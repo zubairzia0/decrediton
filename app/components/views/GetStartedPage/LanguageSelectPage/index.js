@@ -1,19 +1,16 @@
 import LanguageSelectPage from "./Page";
-import { walletStartup } from "connectors";
+import { daemonStartup } from "connectors";
 
 @autobind
-class LanguageSelect extends React.Component{
+class LanguageSelect extends React.Component {
   constructor(props) {
     super(props);
-    this.state = this.getInitialState();
-  }
-
-  getInitialState() {
-    let selectedLang =
-      this.props.availableLanguages.find(v => v.language === this.props.defaultLocale) ||
-      this.props.availableLanguages[0];
-
-    return { selectedLang };
+    const { availableLanguages, defaultLocale } = this.props;
+    this.state = {
+      selectedLang:
+        availableLanguages.find((v) => v.language === defaultLocale) ||
+        availableLanguages[0]
+    };
   }
 
   render() {
@@ -28,8 +25,9 @@ class LanguageSelect extends React.Component{
           onChangeSelectedLang,
           onSelectLang,
           isTestNet
-        }
-        }/>);
+        }}
+      />
+    );
   }
   onChangeSelectedLang(newLang) {
     this.setState({ selectedLang: newLang });
@@ -37,7 +35,6 @@ class LanguageSelect extends React.Component{
   onSelectLang() {
     this.props.onSelectLanguage(this.state.selectedLang);
   }
-
 }
 
-export default walletStartup(LanguageSelect);
+export default daemonStartup(LanguageSelect);

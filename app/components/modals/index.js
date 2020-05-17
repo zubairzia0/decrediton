@@ -8,3 +8,5 @@ export { default as PassphraseModal } from "./PassphraseModal/PassphraseModal";
 export { default as ConfirmModal } from "./ConfirmModal";
 export { default as SeedCopyConfirmModal } from "./SeedCopyConfirmModal";
 export { default as AboutModal } from "./AboutModal/AboutModal";
+export { default as BackupRedeemScriptModal } from "./BackupRedeemScriptModal";
+export { default as AddMixerAccountsModal } from "./AddMixerAccountsModal";

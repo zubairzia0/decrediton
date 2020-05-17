@@ -1,7 +1,7 @@
-import { walletStartup } from "connectors";
+import { daemonStartup } from "connectors";
 
 @autobind
-class GetStartedPosition extends React.Component{
+class GetStartedPosition extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -20,8 +20,8 @@ class GetStartedPosition extends React.Component{
     }
   }
   render() {
-    return (<>sadfsdf</>);
+    return <></>;
   }
 }
 
-export default walletStartup(GetStartedPosition);
+export default daemonStartup(GetStartedPosition);

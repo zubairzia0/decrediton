@@ -1,14 +1,26 @@
 import fs from "fs-extra";
 import path from "path";
 import { createLogger } from "./logging";
-import { getWalletPath, getWalletDb, getDcrdPath, getDcrdRpcCert } from "./paths";
-import { initWalletCfg, newWalletConfigCreation, getWalletCfg, readDcrdConfig } from "config";
-import { launchDCRD, launchDCRWallet, GetDcrdPID, GetDcrwPID, closeDCRD, closeDCRW, GetDcrwPort,
-  launchDCRLnd, GetDcrlndPID, GetDcrlndCreds, closeDcrlnd } from "./launch";
+import { getWalletPath, getWalletDb, getDcrdPath } from "./paths";
+import { initWalletCfg, newWalletConfigCreation, getWalletCfg } from "config";
+import {
+  launchDCRD,
+  launchDCRWallet,
+  GetDcrwPID,
+  closeDCRD,
+  closeDCRW,
+  GetDcrwPort,
+  launchDCRLnd,
+  GetDcrlndPID,
+  GetDcrlndCreds,
+  closeDcrlnd,
+  setDcrdRpcCredentials
+} from "./launch";
 import { MAINNET } from "constants";
 
 const logger = createLogger();
 let watchingOnlyWallet;
+let dcrdIsRemote;
 
 export const getAvailableWallets = (network) => {
   // Attempt to find all currently available wallet.db's in the respective network direction in each wallets data dir
@@ -17,7 +29,7 @@ export const getAvailableWallets = (network) => {
 
   const walletsBasePath = getWalletPath(isTestNet);
   const walletDirs = fs.readdirSync(walletsBasePath);
-  walletDirs.forEach(wallet => {
+  walletDirs.forEach((wallet) => {
     const walletDirStat = fs.statSync(path.join(walletsBasePath, wallet));
     if (!walletDirStat.isDirectory()) return;
 
@@ -27,7 +39,14 @@ export const getAvailableWallets = (network) => {
     const isTrezor = cfg.get("trezor");
     const walletDbFilePath = getWalletDb(isTestNet, wallet);
     const finished = fs.pathExistsSync(walletDbFilePath);
-    availableWallets.push({ network, wallet, finished, lastAccess, watchingOnly, isTrezor });
+    availableWallets.push({
+      network,
+      wallet,
+      finished,
+      lastAccess,
+      watchingOnly,
+      isTrezor
+    });
   });
 
   return availableWallets;
@@ -36,7 +55,11 @@ export const getAvailableWallets = (network) => {
 export const deleteDaemon = (appData, testnet) => {
   let removeDaemonDirectory = getDcrdPath();
   if (appData) removeDaemonDirectory = appData;
-  let removeDaemonDirectoryData = path.join(removeDaemonDirectory, "data", testnet ? "testnet3" : MAINNET);
+  const removeDaemonDirectoryData = path.join(
+    removeDaemonDirectory,
+    "data",
+    testnet ? "testnet3" : MAINNET
+  );
   try {
     if (fs.pathExistsSync(removeDaemonDirectoryData)) {
       fs.removeSync(removeDaemonDirectoryData);
@@ -49,29 +72,44 @@ export const deleteDaemon = (appData, testnet) => {
   }
 };
 
+// startDaemon checks for rpc credentials parameters, which are
+// { rpcuser, rpcpass, rpccert, rpchost, rpcport }, if they are defined
+// dcrdIsRemote is set to true. Otherwise startDaemon checks for appdata
+// parameter and if it is defined startDaemon launches dcrd with appdata's
+// value if it is valid.
+// startDaemon returns an object of format:
+// { appdata, rpc_user, rpc_pass, rpc_cert, rpc_host, rpc_port }
 export const startDaemon = async (params, testnet, reactIPC) => {
-  if (GetDcrdPID() && GetDcrdPID() !== -1) {
-    logger.log("info", "Skipping restart of daemon as it is already running " + GetDcrdPID());
-    const appdata = params ? params.appdata : null;
-    const newConfig = readDcrdConfig(appdata, testnet);
-
-    newConfig.pid =  GetDcrdPID();
-    newConfig.rpc_cert = getDcrdRpcCert(appdata);
-    return newConfig;
+  if (dcrdIsRemote) {
+    logger.log(
+      "info",
+      "Skipping restart of daemon as it is connected as remote"
+    );
+    return;
   }
 
   try {
-    const started = await launchDCRD(params, testnet, reactIPC);
+    const rpcCreds = params && params.rpcCreds;
+    if (rpcCreds) {
+      setDcrdRpcCredentials(rpcCreds);
+      dcrdIsRemote = true;
+      logger.log("info", "dcrd is connected as remote");
+      return rpcCreds;
+    }
+
+    const appdata = params && params.appdata;
+    const started = await launchDCRD(reactIPC, testnet, appdata);
     return started;
-  } catch (e) {
-    logger.log("error", "error launching dcrd: " + e);
+  } catch (err) {
+    logger.log("error", "error launching dcrd: " + err);
+    return { err };
   }
 };
 
 export const createWallet = (testnet, walletPath) => {
   const newWalletDirectory = getWalletPath(testnet, walletPath);
   try {
-    if (!fs.pathExistsSync(newWalletDirectory)){
+    if (!fs.pathExistsSync(newWalletDirectory)) {
       fs.mkdirsSync(newWalletDirectory);
 
       // create new configs for new wallet
@@ -86,19 +124,27 @@ export const createWallet = (testnet, walletPath) => {
 };
 
 export const removeWallet = (testnet, walletPath) => {
-  let removeWalletDirectory = getWalletPath(testnet, walletPath);
+  if (!walletPath) return;
+  const removeWalletDirectory = getWalletPath(testnet, walletPath);
   try {
     if (fs.pathExistsSync(removeWalletDirectory)) {
       fs.removeSync(removeWalletDirectory);
+      return true;
     }
-    return true;
+    return false;
   } catch (e) {
     logger.log("error", "error creating wallet: " + e);
     return false;
   }
 };
 
-export const startWallet = (mainWindow, daemonIsAdvanced, testnet, walletPath, reactIPC) => {
+export const startWallet = (
+  mainWindow,
+  daemonIsAdvanced,
+  testnet,
+  walletPath,
+  reactIPC
+) => {
   if (GetDcrwPID()) {
     logger.log("info", "dcrwallet already started " + GetDcrwPID());
     mainWindow.webContents.send("dcrwallet-port", GetDcrwPort());
@@ -106,24 +152,44 @@ export const startWallet = (mainWindow, daemonIsAdvanced, testnet, walletPath, r
   }
   initWalletCfg(testnet, walletPath);
   try {
-    return launchDCRWallet(mainWindow, daemonIsAdvanced, walletPath, testnet, reactIPC);
+    return launchDCRWallet(
+      mainWindow,
+      daemonIsAdvanced,
+      walletPath,
+      testnet,
+      reactIPC
+    );
   } catch (e) {
     logger.log("error", "error launching dcrwallet: " + e);
   }
 };
 
-export const startDcrlnd = async (walletAccount, walletPort, rpcCreds,
-  walletPath, testnet, autopilotEnabled) => {
-
+export const startDcrlnd = async (
+  walletAccount,
+  walletPort,
+  rpcCreds,
+  walletPath,
+  testnet,
+  autopilotEnabled
+) => {
   if (GetDcrlndPID() && GetDcrlndPID() !== -1) {
-    logger.log("info", "Skipping restart of dcrlnd as it is already running " + GetDcrlndPID());
+    logger.log(
+      "info",
+      "Skipping restart of dcrlnd as it is already running " + GetDcrlndPID()
+    );
     const creds = GetDcrlndCreds();
     return { wasRunning: true, ...creds };
   }
 
   try {
-    const started = await launchDCRLnd(walletAccount, walletPort, rpcCreds,
-      walletPath, testnet, autopilotEnabled);
+    const started = await launchDCRLnd(
+      walletAccount,
+      walletPort,
+      rpcCreds,
+      walletPath,
+      testnet,
+      autopilotEnabled
+    );
     return started;
   } catch (e) {
     logger.log("error", "error launching dcrlnd: " + e);

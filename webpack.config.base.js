@@ -14,11 +14,10 @@ export default {
 
   module: {
     rules: [ {
-      test: /\.jsx?$/,
+      test: /\.(js|jsx)$/,
       exclude: /node_modules/,
-      use: [ {
-        loader: "babel-loader"
-      } ]
+      include: /app/,
+      loader: "babel-loader"
     },
     {
       test: /\.(png|jpg)$/,
@@ -43,8 +42,7 @@ export default {
       use: [ {
         loader: "raw-loader"
       } ]
-    }
-    ]
+    }]
   },
 
   output: {
@@ -67,7 +65,7 @@ export default {
   },
 
   plugins: [ new webpack.ProvidePlugin({
-    React:     "react",
+    React: "react",
     PropTypes: "prop-types",
     autobind: [ "core-decorators", "autobind" ]
   }) ],

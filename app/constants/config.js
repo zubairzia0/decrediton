@@ -2,13 +2,12 @@ import { MAINNET } from "./Decrediton";
 
 export const DAEMON_ADVANCED = "daemon_start_advanced";
 export const THEME = "theme";
-export const OPEN_FORM = "must_open_form";
 export const LOCALE = "locale";
 export const NETWORK = "network";
 export const SET_LANGUAGE = "set_language";
 export const UI_ANIMATION = "ui_animations";
 export const SHOW_SPV_CHOICE = "show_spvchoice";
-export const SHOW_TUTORIAL  = "show_tutorial";
+export const SHOW_TUTORIAL = "show_tutorial";
 export const SHOW_PRIVACY = "show_privacy";
 export const ALLOW_EXTERNAL_REQUEST = "allowed_external_requests";
 export const PROXY_TYPE = "proxy_type";
@@ -23,6 +22,7 @@ export const APPDATA = "appdata_path";
 export const DISABLE_HARDWARE_ACCEL = "disable_hardware_accel";
 export const LN_ENABLED = "ln_enabled";
 export const TREZOR_DEBUG = "trezor_debug";
+export const UPGD_ELECTRON8 = "upgd_electron8";
 
 export const RPCUSER = "rpc_user";
 export const RPCPASS = "rpc_pass";
@@ -30,7 +30,13 @@ export const RPCCERT = "rpc_cert";
 export const RPCHOST = "rpc_host";
 export const RPCPORT = "rpc_port";
 
-export const setDaemonRemoteCredentials = (rpcuser, rpcpass, rpccert, rpchost, rpcport) => {
+export const setDaemonRemoteCredentials = (
+  rpcuser,
+  rpcpass,
+  rpccert,
+  rpchost,
+  rpcport
+) => {
   return {
     [RPCUSER]: rpcuser,
     [RPCPASS]: rpcpass,
@@ -43,7 +49,6 @@ export const setDaemonRemoteCredentials = (rpcuser, rpcpass, rpccert, rpchost, r
 export const INITIAL_VALUES = {
   [DAEMON_ADVANCED]: false,
   [THEME]: "theme-light",
-  [OPEN_FORM]: true,
   [LOCALE]: "",
   [NETWORK]: MAINNET,
   [SET_LANGUAGE]: true,
@@ -63,5 +68,6 @@ export const INITIAL_VALUES = {
   [APPDATA]: "",
   [TREZOR_DEBUG]: false,
   [DISABLE_HARDWARE_ACCEL]: false,
-  [LN_ENABLED]: false
+  [LN_ENABLED]: false,
+  [UPGD_ELECTRON8]: false
 };

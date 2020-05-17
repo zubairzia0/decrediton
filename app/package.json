@@ -1,7 +1,7 @@
 {
   "name": "decrediton",
   "productName": "decrediton",
-  "version": "1.5.0",
+  "version": "1.6.0-pre",
   "description": "Cross-platform decred gui based on Electron and React",
   "main": "./main.js",
   "author": {
@@ -15,8 +15,8 @@
     "bs58check": "^2.1.1",
     "electron-store": "1.2.0",
     "fs-extra": "^5.0.0",
-    "grpc": "1.20.0",
-    "minimist": "^1.2.0"
+    "grpc": "1.24.2",
+    "minimist": "^1.2.3"
   },
   "resolutions": {
     "conf": "1.1.2"

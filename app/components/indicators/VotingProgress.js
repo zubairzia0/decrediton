@@ -1,7 +1,7 @@
-export default ({ voteCounts, quorumMinimumVotes }) => {
+import { classNames } from "pi-ui";
 
-  if (!voteCounts)
-    return <></>;
+export default ({ voteCounts, quorumMinimumVotes, className }) => {
+  if (!voteCounts) return <></>;
 
   // TODO: support options other than yes/no/abstain (currently not used on
   // politeia)
@@ -18,7 +18,7 @@ export default ({ voteCounts, quorumMinimumVotes }) => {
   // const abstainPerc = (abstainCount / quorumMinimumVotes) * 100;
 
   return (
-    <div className="voting-progress-indicator">
+    <div className={classNames("voting-progress-indicator", className)}>
       <div className="voting-progress-yes" style={{ width: yesPerc + "%" }} />
       <div className="voting-progress-no" style={{ width: noPerc + "%" }} />
       {/* <div className="voting-progress-abstain" style={{ width: abstainPerc + "%" }} /> */}

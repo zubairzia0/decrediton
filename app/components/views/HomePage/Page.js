@@ -8,7 +8,6 @@ import TicketActivity from "./tables/TicketActivity";
 import BalanceTab from "./tabs/Balance";
 import TicketsTab from "./tabs/Tickets";
 import TransactionsTab from "./tabs/Transactions";
-import "style/Fonts.less";
 import "style/HomePage.less";
 
 const tabMessages = [
@@ -19,30 +18,18 @@ const tabMessages = [
 
 const tabLink = (i) => {
   const m = [
-    (
-      <Tooltip text={tabMessages[i]}>
-        <span className="overview-tab balance" />
-        <span className="overview-tab-label">
-          {tabMessages[i]}
-        </span>
-      </Tooltip>
-    ),
-    (
-      <Tooltip text={tabMessages[i]}>
-        <span className="overview-tab tickets" />
-        <span className="overview-tab-label">
-          {tabMessages[i]}
-        </span>
-      </Tooltip>
-    ),
-    (
-      <Tooltip text={tabMessages[i]}>
-        <span className="overview-tab tx" />
-        <span className="overview-tab-label">
-          {tabMessages[i]}
-        </span>
-      </Tooltip>
-    )
+    <Tooltip text={tabMessages[i]}>
+      <span className="overview-tab balance" />
+      <span className="overview-tab-label">{tabMessages[i]}</span>
+    </Tooltip>,
+    <Tooltip text={tabMessages[i]}>
+      <span className="overview-tab tickets" />
+      <span className="overview-tab-label">{tabMessages[i]}</span>
+    </Tooltip>,
+    <Tooltip text={tabMessages[i]}>
+      <span className="overview-tab tx" />
+      <span className="overview-tab-label">{tabMessages[i]}</span>
+    </Tooltip>
   ];
   return m[i];
 };
@@ -63,17 +50,20 @@ const HomePage = ({
             <Balance
               classNameWrapper="overview-balance"
               classNameUnit="overview-balance-unit"
-              amount={totalBalance} />
+              amount={totalBalance}
+            />
             <div className="overview-balance-label">
               <T id="home.currentTotalBalanceLabel" m="Current Total Balance" />
             </div>
           </div>
 
-          <RoutedTabsHeader tabs={[
-            RoutedTab("/home/balance", tabLink(0)),
-            RoutedTab("/home/tickets", tabLink(1)),
-            RoutedTab("/home/transactions", tabLink(2))
-          ]} />
+          <RoutedTabsHeader
+            tabs={[
+              RoutedTab("/home/balance", tabLink(0)),
+              RoutedTab("/home/tickets", tabLink(1)),
+              RoutedTab("/home/transactions", tabLink(2))
+            ]}
+          />
         </div>
       </div>
 
@@ -85,8 +75,22 @@ const HomePage = ({
       </Switch>
 
       <div className="overview-transactions-ticket is-row">
-        <RecentTransactions {...{ transactions, getTransactionsRequestAttempt, getAccountsResponse, rowNumber }} />
-        <TicketActivity {...{ tickets, getTransactionsRequestAttempt, getAccountsResponse, rowNumber }} />
+        <RecentTransactions
+          {...{
+            transactions,
+            getTransactionsRequestAttempt,
+            getAccountsResponse,
+            rowNumber
+          }}
+        />
+        <TicketActivity
+          {...{
+            tickets,
+            getTransactionsRequestAttempt,
+            getAccountsResponse,
+            rowNumber
+          }}
+        />
       </div>
     </>
   );

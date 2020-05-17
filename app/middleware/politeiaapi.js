@@ -2,6 +2,8 @@
 import axios from "axios";
 
 // Uncomment this and comment the following definition to test locally.
+// Also uncomment a code part at externalRequests.js, as politeia is a ssl-enabled
+// service and decrediton will fail to fetch locally with a self signed cert.
 // export const POLITEIA_URL_TESTNET = "https://localhost:4443";
 
 // Politeia doc source:
@@ -26,7 +28,7 @@ function GET(piURL, path) {
 }
 
 function POST(piURL, path, payload) {
-  return ensureCSRF(piURL).then(resp => {
+  return ensureCSRF(piURL).then((resp) => {
     const cfg = {
       headers: {
         [CSRF_TOKEN_HEADER]: resp.headers[CSRF_TOKEN_HEADER]
@@ -39,14 +41,21 @@ function POST(piURL, path, payload) {
 export const getActiveVotes = (piURL) => GET(piURL, "/v1/proposals/activevote");
 export const getVetted = (piURL) => GET(piURL, "/v1/proposals/vetted");
 export const getVotesStatus = (piURL) => GET(piURL, "/v1/proposals/votestatus");
-export const getProposal = (piURL, token) => GET(piURL, "/v1/proposals/" + token);
-export const getProposalVotes = (piURL, token) => GET(piURL, "/v1/proposals/" + token + "/votes");
-export const getProposalVoteStatus = (piURL, token) => GET(piURL, "/v1/proposals/" + token + "/votestatus");
-export const getTokenInventory = (piURL) => GET(piURL, "/v1/proposals/tokeninventory");
+export const getProposal = (piURL, token) =>
+  GET(piURL, "/v1/proposals/" + token);
+export const getProposalVotes = (piURL, token) =>
+  GET(piURL, "/v1/proposals/" + token + "/votes");
+export const getProposalVoteStatus = (piURL, token) =>
+  GET(piURL, "/v1/proposals/" + token + "/votestatus");
+export const getTokenInventory = (piURL) =>
+  GET(piURL, "/v1/proposals/tokeninventory");
 
 // votes must be an array of Vote()-produced objects.
-export const castVotes = (piURL, votes) => POST(piURL, "/v1/proposals/castvotes", { votes });
+export const castVotes = (piURL, votes) =>
+  POST(piURL, "/v1/proposals/castvotes", { votes });
 
 // tokens is an array of tokens to be fetched.
-export const getProposalsBatch = (piURL, tokens) => POST(piURL, "/v1/proposals/batch", { tokens });
-export const getProposalsVoteStatusBatch = (piURL, tokens) => POST(piURL, "/v1/proposals/batchvotesummary", { tokens });
+export const getProposalsBatch = (piURL, tokens) =>
+  POST(piURL, "/v1/proposals/batch", { tokens });
+export const getProposalsVoteStatusBatch = (piURL, tokens) =>
+  POST(piURL, "/v1/proposals/batchvotesummary", { tokens });

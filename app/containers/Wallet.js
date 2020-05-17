@@ -14,16 +14,34 @@ import TransactionPage from "components/views/TransactionPage";
 import TicketsPage from "components/views/TicketsPage";
 import TutorialsPage from "components/views/TutorialsPage";
 import GovernancePage from "components/views/GovernancePage";
+import ProposalDetailsPage from "components/views/ProposalDetailsPage/ProposalDetailsPage";
 import TrezorPage from "components/views/TrezorPage";
 import LNPage from "components/views/LNPage";
 import SideBar from "components/SideBar";
 import { BlurableContainer } from "layout";
 import { walletContainer, theming } from "connectors";
+import ReactTimeout from "react-timeout";
 
-const pageAnimation = { atEnter: { opacity: 0 }, atLeave: { opacity: 0 }, atActive: { opacity: 1 } };
+const pageAnimation = {
+  atEnter: { opacity: 0 },
+  atLeave: { opacity: 0 },
+  atActive: { opacity: 1 }
+};
 
 @autobind
 class Wallet extends React.Component {
+  constructor(props) {
+    super(props);
+    const { compareInventory, politeiaEnabled } = props;
+    // Compare politeias inventory and update proposal list if they are different
+    // every 1 minute.
+    this.fetchPoliteiaInventory = this.props.setInterval(() => {
+      if (politeiaEnabled) {
+        compareInventory();
+      }
+    }, 60000);
+  }
+
   render() {
     const { expandSideBar } = this.props;
     const MainSwitch = this.props.uiAnimations ? AnimatedSwitch : StaticSwitch;
@@ -31,28 +49,36 @@ class Wallet extends React.Component {
     return (
       <div className={"page-body"}>
         <SideBar />
-        <BlurableContainer className={expandSideBar ? "page-view" : "page-view-reduced-bar"}>
+        <BlurableContainer
+          className={expandSideBar ? "page-view" : "page-view-reduced-bar"}>
           <MainSwitch {...pageAnimation}>
-            <Route path="/home"                           component={HomePage} />
-            <Route path="/accounts"                       component={AccountsPage} />
-            <Route path="/settings"                       component={SettingsPage} />
-            <Route path="/walletError"                    component={WalletError} />
-            <Route path="/error"                          component={ErrorScreen} />
-            <Route path="/invalidRPCVersion"              component={InvalidRPCVersion} />
-            <Route path="/help"                           component={HelpPage} />
-            <Route path="/security"                       component={SecurityPage} />
-            <Route path="/transactions"                   component={TransactionsPage} />
-            <Route path="/tickets"                        component={TicketsPage} />
-            <Route path="/tutorial"                       component={TutorialsPage} />
-            <Route path="/governance"                     component={GovernancePage} />
-            <Route path="/trezor"                         component={TrezorPage} />
-            <Route path="/ln"                             component={LNPage} />
+            <Route path="/home" component={HomePage} />
+            <Route path="/accounts" component={AccountsPage} />
+            <Route path="/settings" component={SettingsPage} />
+            <Route path="/walletError" component={WalletError} />
+            <Route path="/error" component={ErrorScreen} />
+            <Route path="/invalidRPCVersion" component={InvalidRPCVersion} />
+            <Route path="/help" component={HelpPage} />
+            <Route path="/security" component={SecurityPage} />
+            <Route path="/transactions" component={TransactionsPage} />
+            <Route path="/tickets" component={TicketsPage} />
+            <Route path="/tutorial" component={TutorialsPage} />
+            <Route path="/governance" component={GovernancePage} />
+            <Route path="/trezor" component={TrezorPage} />
+            <Route path="/ln" component={LNPage} />
           </MainSwitch>
-          <Route path="/transactions/history/:txHash" component={TransactionPage} />
+          <Route
+            path="/transactions/history/:txHash"
+            component={TransactionPage}
+          />
+          <Route
+            path="/proposal/details/:token"
+            component={ProposalDetailsPage}
+          />
         </BlurableContainer>
       </div>
     );
   }
 }
 
-export default walletContainer(theming(Wallet));
+export default ReactTimeout(walletContainer(theming(Wallet)));

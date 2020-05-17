@@ -1,11 +1,10 @@
 @import (reference) "./main.less";
-@import (reference) "./Icons.less";
 
 .accounts-button-icon {
   display: inline-block;
   width: 20px;
   height: 20px;
-  background-image: @accounts-button-icon;
+  background-image: var(--accounts-button-icon);
   background-position: 50%;
   background-size: 12px auto;
   background-repeat: no-repeat;
@@ -219,7 +218,7 @@
 
 .manage-pools-button {
   background-color: var(--input-color);
-  background-image: @manage-pools-icon;
+  background-image: var(--manage-pools-icon);
   background-position: 50% 50%;
   background-size: 12px;
   background-repeat: no-repeat;
@@ -356,7 +355,7 @@
 }
 
 .ticket-cogs-closed {
-  background-image: @tickets-cogs-closed-icon;
+  background-image: var(--tickets-cogs-closed-icon);
 }
 
 .ticket-cogs-opened:hover,
@@ -416,7 +415,7 @@
 
 .rescan-button:not(.spin):hover {
   opacity: 0.7;
-  background-image: @menu-rescan-hover-icon;
+  background-image: var(--menu-rescan-hover-icon);
 }
 
 @keyframes spin {
@@ -448,7 +447,7 @@
   border: none;
   outline: none;
   background-color: transparent;
-  background-image: @menu-cancel-rescan-icon;
+  background-image: var(--menu-cancel-rescan-icon);
   background-size: 16px 16px;
   cursor: pointer;
   margin: 10px;
@@ -527,16 +526,17 @@
 
 .no-more-tickets-indicator {
   height: 35px;
-  background-color: #E6EAED;
+  background-color: var(--no-more-tickets-indicator-bg);
   line-height: 35px;
+  margin-right: 20px;
 }
 
 .no-tickets-indicator {
-  background-image: @no-tickets-icon;
+  background-image: var(--no-tickets-icon);
 }
 
 .no-stats-indicator {
-  background-image: @stats-disabled-icon;
+  background-image: var(--stats-disabled-icon);
 }
 
 .vertical-expand {
@@ -664,6 +664,36 @@
   background: var(--input-color);
 }
 
+// Style of UnsignedTxs component
+.unsigned-raw-tx-title {
+  color: var(--title-text-and-button-background);
+  font-size: 14pt;
+  padding-bottom: 10px;
+}
+
+.unsigned-raw-tx-area {
+  word-wrap: break-word;
+  width: 600px;
+  height: 110px;
+  background: var(--background-back-color);
+  margin-top: 10px;
+  padding: 20px;
+  border-radius: 10px;
+  display: table;
+}
+
+.unsigned-raw-tx {
+  float: left;
+  width: 550px;
+}
+
+.unsigned-raw-tx-copy-to-clipboard-icon {
+  float: right;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+// end of UnsignedTx component style
 @media screen and (max-width: 511px) {
   .settings-save-button .key-blue-button {
     margin-top: 0;
@@ -720,7 +750,7 @@
 }
 
 .vertical-accordion-header:hover .vertical-accordion-arrow {
-  background-image: @arrow-right-blue-icon;
+  background-image: var(--arrow-right-blue-icon);
 
   &.disabled {
     background-image: var(--arrow-right-gray-icon);
@@ -759,11 +789,12 @@
   }
 }
 
-.rebroadcast-button-container {
+.rebroadcast-button-container, .abandon-button-container {
   width: 815px;
 }
+
 .rebroadcast-button {
-  background-image: @rebroadcastTransaction;
+  background-image: var(--rebroadcast-transaction-icon);
   background-position: 20px 12px;
   background-size: 20px;
   background-repeat: no-repeat;
@@ -772,30 +803,40 @@
   margin-top: -22px;
 }
 
+.abandon-button {
+  float: right;
+  margin-top: -22px;
+  margin-right: 20px;
+}
+
 @media screen and (max-width: 1179px) { 
-  .rebroadcast-button-container {
+  .rebroadcast-button-container, .abandon-button-container {
     width: 770px;
   }
-  
+
   .voting-progress-indicator {
     width: 120px;
   }
 }
 
 @media screen and (max-width: 1106px) { 
-  .rebroadcast-button-container {
+  .rebroadcast-button-container, .abandon-button-container {
+    width: 670px;
+  } 
+  
+  .abandon-button-container {
     width: 670px;
   } 
 }
 
 @media screen and (max-width: 768px) {
-  .rebroadcast-button-container {
+  .rebroadcast-button-container, .abandon-button-container {
     width: 375px;
     text-align: center;
     display: block;
     margin-top: -22px;
 
-    .rebroadcast-button {
+    .rebroadcast-button, .abandon-button {
       float: none;
       padding: 12px 30px 14px 48px;
       margin-top: 0;

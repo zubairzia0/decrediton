@@ -13,10 +13,15 @@ import AboutModal from "../components/modals/AboutModal/AboutModal";
 import AutobuyerRunningModal from "../components/modals/AutobuyerRunningModal/AutobuyerRunningModal";
 import { log } from "wallet";
 import { TrezorModals } from "components/modals/trezor";
-import "style/Themes.less";
 import "style/Layout.less";
 import { ipcRenderer } from "electron";
-const topLevelAnimation = { atEnter: { opacity: 0 }, atLeave: { opacity: 0 }, atActive: { opacity: 1 } };
+import { hot } from "react-hot-loader/root";
+
+const topLevelAnimation = {
+  atEnter: { opacity: 0 },
+  atLeave: { opacity: 0 },
+  atActive: { opacity: 1 }
+};
 
 // minimum size to reduce the sidebar in px.
 const MINIMUM_SIZE_TO_REDUCE_SIDEBAR = 1179;
@@ -35,7 +40,7 @@ class App extends React.Component {
     hideAutobuyerRunningModal: PropTypes.func.isRequired
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     const { window } = props;
     window.addEventListener("beforeunload", this.beforeWindowUnload);
@@ -45,11 +50,12 @@ class App extends React.Component {
     window.addEventListener("resize", this.updateWindowDimensions);
     this.updateWindowDimensions();
     this.refreshing = false;
+    this.props.decreditonInit();
 
     props.listenForAppReloadRequest(this.onReloadRequested);
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     window.removeEventListener("beforeunload", this.beforeWindowUnload);
   }
 
@@ -117,7 +123,15 @@ class App extends React.Component {
   }
 
   render() {
-    const { locale, theme, aboutModalMacOSVisible, hideAboutModalMacOS, autobuyerRunningModalVisible, hideAutobuyerRunningModal, shutdownApp } = this.props;
+    const {
+      locale,
+      theme,
+      aboutModalMacOSVisible,
+      hideAboutModalMacOS,
+      autobuyerRunningModalVisible,
+      hideAutobuyerRunningModal,
+      shutdownApp
+    } = this.props;
     const MainSwitch = this.props.uiAnimations ? AnimatedSwitch : StaticSwitch;
 
     return (
@@ -128,22 +142,33 @@ class App extends React.Component {
         defaultFormats={defaultFormats}
         key={locale.key}>
         <main className={theme}>
-          <Switch><Redirect from="/" exact to="/getstarted" /></Switch>
-          <Snackbar/>
+          <Switch>
+            <Redirect from="/" exact to="/getstarted" />
+          </Switch>
+          <Snackbar />
           <MainSwitch {...topLevelAnimation} className="top-level-container">
-            <Route path="/getstarted"  component={GetStartedContainer} />
-            <Route path="/shutdown"    component={ShutdownAppPage} />
-            <Route path="/error"       component={FatalErrorPage} />
-            <Route path="/"            component={WalletContainer} />
+            <Route path="/getstarted" component={GetStartedContainer} />
+            <Route path="/shutdown" component={ShutdownAppPage} />
+            <Route path="/error" component={FatalErrorPage} />
+            <Route path="/" component={WalletContainer} />
           </MainSwitch>
 
           <div id="modal-portal" />
-          <div id="modal-portal-macos" >
-            <AboutModal show={aboutModalMacOSVisible} onCancelModal={hideAboutModalMacOS}></AboutModal>
+          <div id="modal-portal-macos">
+            <AboutModal
+              show={aboutModalMacOSVisible}
+              onCancelModal={hideAboutModalMacOS}></AboutModal>
           </div>
           <TrezorModals />
           <div id="modal-portal-autobuyer-running">
-            <AutobuyerRunningModal show={autobuyerRunningModalVisible} onSubmit={() => { hideAutobuyerRunningModal(); shutdownApp(); }} onCancelModal={hideAutobuyerRunningModal} />
+            <AutobuyerRunningModal
+              show={autobuyerRunningModalVisible}
+              onSubmit={() => {
+                hideAutobuyerRunningModal();
+                shutdownApp();
+              }}
+              onCancelModal={hideAutobuyerRunningModal}
+            />
           </div>
         </main>
       </IntlProvider>
@@ -151,4 +176,4 @@ class App extends React.Component {
   }
 }
 
-export default app(theming(App));
+export default hot(app(theming(App)));

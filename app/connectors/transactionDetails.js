@@ -10,9 +10,14 @@ const mapStateToProps = selectorMap({
   tsDate: sel.tsDate
 });
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  goBackHistory: ca.goBackHistory,
-  publishUnminedTransactions: cla.publishUnminedTransactionsAttempt
-}, dispatch);
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators(
+    {
+      goBackHistory: ca.goBackHistory,
+      publishUnminedTransactions: cla.publishUnminedTransactionsAttempt,
+      abandonTransaction: ca.abandonTransactionAttempt
+    },
+    dispatch
+  );
 
 export default connect(mapStateToProps, mapDispatchToProps);

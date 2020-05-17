@@ -1,20 +1,35 @@
 // @flow
-window.eval = () => { throw new Error("Do not import things that use eval()"); };
-import { render } from "react-dom";
+import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
-import { ConnectedRouter } from "react-router-redux";
+import { ConnectedRouter } from "connected-react-router";
 import { Switch, Route } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { App } from "containers";
 import configureStore from "./store/configureStore";
-import { getGlobalCfg } from "./config";
+import { getGlobalCfg, getDaemonIsAdvanced, getIsSpv } from "./config";
 import locales from "./i18n/locales";
+import "pi-ui/dist/index.css";
 import "./style/main.less";
 import "./style/ReactSelectGlobal.less";
 import pkg from "./package.json";
 import { log } from "./wallet";
 import { ipcRenderer } from "electron";
-import { DCR, DAEMON_ADVANCED, THEME, OPEN_FORM, LOCALE, NETWORK } from "constants";
+import { DCR, THEME, LOCALE, NETWORK } from "constants";
+import { getSelectedWallet } from "./main_dev/launch";
+import { AppContainer } from "react-hot-loader";
+
+import { defaultLightTheme, ThemeProvider, defaultDarkTheme } from "pi-ui";
+import { lightTheme, darkTheme, icons } from "style/themes";
+import SourceSansProLight from "style/fonts/SourceSansPro-Light.ttf";
+import SourceSansProLightItalic from "style/fonts/SourceSansPro-LightItalic.ttf";
+import SourceSansProRegular from "style/fonts/SourceSansPro-Regular.ttf";
+import SourceSansProItalic from "style/fonts/SourceSansPro-Italic.ttf";
+import SourceSansProSemiBold from "style/fonts/SourceSansPro-SemiBold.ttf";
+import SourceSansProSemiBoldItalic from "style/fonts/SourceSansPro-SemiBoldItalic.ttf";
+import SourceSansProBold from "style/fonts/SourceSansPro-Bold.ttf";
+import SourceSansProBoldItalic from "style/fonts/SourceSansPro-BoldItalic.ttf";
+import InconsolataRegular from "style/fonts/Inconsolata-Regular.ttf";
+import InconsolataBold from "style/fonts/Inconsolata-Bold.ttf";
 
 const globalCfg = getGlobalCfg();
 const locale = globalCfg.get(LOCALE);
@@ -22,24 +37,27 @@ const cliOptions = ipcRenderer.sendSync("get-cli-options");
 
 log("info", "Starting main react app");
 
+const hasCliOption = (key) => cliOptions && cliOptions[key];
+
 const currentSettings = {
   locale: locale,
-  daemonStartAdvanced: (cliOptions && cliOptions.daemonStartAdvanced) || globalCfg.get(DAEMON_ADVANCED),
-  daemonStartAdvancedFromCli: !!(cliOptions && cliOptions.daemonStartAdvanced),
+  daemonStartAdvanced:
+    hasCliOption("daemonStartAdvanced") || getDaemonIsAdvanced(),
+  daemonStartAdvancedFromCli: !!hasCliOption("daemonStartAdvanced"),
   allowedExternalRequests: globalCfg.get("allowed_external_requests"),
   proxyType: globalCfg.get("proxy_type"),
   proxyLocation: globalCfg.get("proxy_location"),
-  spvMode: (cliOptions && cliOptions.spvMode) || globalCfg.get("spv_mode"),
-  spvModeFromCli: !!(cliOptions && cliOptions.spvMode),
-  spvConnect: (cliOptions && cliOptions.spvConnect) || globalCfg.get("spv_connect"),
-  spvConnectFromCli: !!(cliOptions && cliOptions.spvConnect),
+  spvMode: hasCliOption("spvMode") || getIsSpv(),
+  spvModeFromCli: !!hasCliOption("spvMode"),
+  spvConnect: hasCliOption("spvConnect") || globalCfg.get("spv_connect"),
+  spvConnectFromCli: !!hasCliOption("spvConnect"),
   timezone: globalCfg.get("timezone"),
   currencyDisplay: DCR,
-  network: (cliOptions && cliOptions.network) || globalCfg.get(NETWORK),
-  networkFromCli: !!(cliOptions && cliOptions.network),
+  network: hasCliOption("network") || globalCfg.get(NETWORK),
+  networkFromCli: !!hasCliOption("network"),
   theme: globalCfg.get(THEME)
 };
-var initialState = {
+const initialState = {
   settings: {
     currentSettings: currentSettings,
     tempSettings: currentSettings,
@@ -68,7 +86,7 @@ var initialState = {
     setLanguage: globalCfg.get("set_language"),
     showSpvChoice: globalCfg.get("show_spvchoice"),
     daemonStarted: false,
-    daemonSynced: false,
+    daemonSynced: ipcRenderer.sendSync("get-height-synced"),
     daemonStopped: false,
     daemonTimeout: false,
     walletReady: false,
@@ -76,21 +94,18 @@ var initialState = {
     timeLeftEstimate: null,
     timeStart: 0,
     blockStart: 0,
-    daemonAdvanced: (cliOptions && cliOptions.daemonStartAdvanced) || globalCfg.get(DAEMON_ADVANCED),
     credentials: null,
     appdata: null,
     shutdownRequested: false,
-    openForm: globalCfg.get(OPEN_FORM),
     remoteAppdataError: false,
     previousWallet: null,
-    selectCreateWalletInputRequest: true,
     hiddenAccounts: Array(),
     walletName: null,
     neededBlocks: 0
   },
   version: {
     // RequiredVersion
-    requiredVersion: "7.0.0",
+    requiredVersion: "7.4.0",
     versionInvalid: false,
     versionInvalidError: null,
     // VersionService
@@ -199,6 +214,7 @@ var initialState = {
     getTicketsProgressStartRequestHeight: null,
 
     // Agenda/VoteChoices
+    allAgendas: [],
     getAgendasResponse: null,
     getVoteChoicesResponse: null,
 
@@ -228,12 +244,12 @@ var initialState = {
     syncAttemptRequest: false,
     syncCall: null,
     peerCount: 0,
-    existingOrNew: false,
     rpcRetryAttempts: 0,
     curBlocks: 0,
-    stepIndex: 0,
     maxWalletCount: globalCfg.get("max_wallet_count"),
     isWatchingOnly: false,
+    // getSelectedWallet returns null if no wallet is selected.
+    selectedWallet: getSelectedWallet(),
 
     synced: false,
     syncFetchHeadersComplete: false,
@@ -243,28 +259,7 @@ var initialState = {
     loader: null,
     getLoaderError: null,
     // WalletCreate
-    createWalletExisting: false,
-    confirmNewSeed: false,
-    walletCreateRequestAttempt: false,
-    walletCreateResponse: null,
-    walletCreateError: null,
-    walletCreateExisting: false,
-    // WalletExist
-    walletExistRequestAttempt: false,
-    walletExistResponse: null,
-    walletExistError: null,
-    // WalletOpen
-    walletOpenRequestAttempt: false,
-    walletOpenResponse: null,
-    walletOpenError: null,
-    // WalletClose
-    walletCloseRequestAttempt: false,
-    walletClosedResponse: null,
-    walletClosedError: null,
-    // StartRpc
-    startRpcRequestAttempt: false,
-    startRpcResponse: null,
-    startRpcError: null
+    createWalletExisting: false
   },
   notifications: {
     transactionNtfns: null,
@@ -362,6 +357,7 @@ var initialState = {
     validateAddressResponse: null,
     validateAddressError: null,
 
+    walletMasterPubKey: null,
     exportingData: false,
     modalVisible: false,
     aboutModalMacOSVisible: false,
@@ -385,17 +381,10 @@ var initialState = {
   },
   governance: {
     getProposalsAttempt: false,
-    inventory: [],
-    proposals: {
-      activeVote: [],
-      abandonedVote: [],
-      preVote: [],
-      finishedVote: []
-    },
+    inventory: null,
+    proposals: null,
     proposalsDetails: {},
-    getProposalAttempt: false,
     getProposalError: null,
-    lastVettedFetchTime: new Date(0), // time when vetted proposals were requested
     // TODO: Get proposallistpagesize from politeia's request: /v1/policy
     proposallistpagesize: 20
   },
@@ -450,16 +439,86 @@ var initialState = {
   locales: locales
 };
 
+const fonts = [
+  // Source Sans Pro
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProLight}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-light"]
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProLightItalic}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-light"],
+    "font-style": "italic"
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProRegular}) format("truetype")`
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProItalic}) format("truetype")`,
+    "font-style": "italic"
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProSemiBold}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-semi-bold"]
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProSemiBoldItalic}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-semi-bold"],
+    "font-style": "italic"
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProBold}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-bold"]
+  },
+  {
+    "font-family": "Source Sans Pro",
+    src: `url(${SourceSansProBoldItalic}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-bold"],
+    "font-style": "italic"
+  },
+  // Inconsolata
+  {
+    "font-family": "Inconsolata",
+    src: `url(${InconsolataRegular}) format("truetype")`
+  },
+  {
+    "font-family": "Inconsolata",
+    src: `url(${InconsolataBold}) format("truetype")`,
+    "font-weight": defaultLightTheme["font-weight-bold"]
+  }
+];
+
+const themes = {
+  "theme-light": { ...defaultLightTheme, ...lightTheme, ...icons },
+  "theme-dark": { ...defaultDarkTheme, ...darkTheme, ...icons }
+};
+
 const history = createMemoryHistory();
 const store = configureStore(initialState, history);
 
-render(
-  <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <Switch>
-        <Route path="/" component={App} />
-      </Switch>
-    </ConnectedRouter>
-  </Provider>,
+const render = () => ReactDOM.render(
+  <AppContainer>
+    <ThemeProvider
+      themes={themes}
+      defaultThemeName={currentSettings.theme}
+      fonts={fonts}>
+      <Provider store={store}>
+        <ConnectedRouter history={history}>
+          <Switch>
+            <Route path="/" component={App} />
+          </Switch>
+        </ConnectedRouter>
+      </Provider>
+    </ThemeProvider>
+  </AppContainer>,
   document.getElementById("root")
 );
+
+render();

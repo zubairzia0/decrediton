@@ -1,9 +1,8 @@
 @import (reference) "./main.less";
-@import (reference) "./Icons.less";
 
 .overview-header {
   padding-left: 63px;
-  padding-top: 47px; 
+  padding-top: 47px;
   padding-right: 56px;
   justify-content: space-between;
   background-color: var(--background-back-color);
@@ -66,38 +65,44 @@
 }
 
 .overview-balance-spendable-locked {
-  font-size: 17px;
+  font-family: var(--font-family-regular);
+  line-height: 13px;
   color: var(--input-color-default);
-  font-family: var(--font-family-monospaced);
-  line-height: 18px;
   padding-left: 10px;
   margin-right: 2px;
   background-repeat: no-repeat;
   background-position: 0 50%;
   background-size: 7px;
 
+  > .count,
+  &.amount {
+  font-size: 17px;
+  font-family: var(--font-family-monospaced);
+  line-height: 18px;
+  }
+
   &.active {
-    background-image: @legend-active;
+    background-image: var(--legend-active);
   }
-  
+
   &.voted {
-    background-image: @legend-voted;
+    background-image: var(--legend-voted);
   }
-  
+
   &.received {
-    background-image: @legend-received;
+    background-image: var(--legend-received);
   }
 
   &.sent {
-    background-image: @legend-sent;
+    background-image: var(--legend-sent);
   }
 
   &.available {
-    background-image: @legend-available;
+    background-image: var(--legend-available);
   }
 
   &.locked {
-    background-image: @legend-locked;
+    background-image: var(--legend-locked);
   }
 }
 
@@ -161,23 +166,23 @@
 
 .overview-no-transactions {
   a.receive {
-    background-image: @generate-addr-icon;
+    background-image: var(--generate-addr-icon);
   }
   a.buy {
-    background-image: @buy-decred-icon;
+    background-image: var(--buy-decred-icon);
   }
 }
 
 .overview-no-tickets {
   width: 352px;
   a.purchaseTickets {
-    background-image: @dummy-icon;
+    background-image: var(--dummy-icon);
   }
   a.whatIsStaking {
-    background-image: @what-is-staking-icon;
+    background-image: var(--what-is-staking-icon);
   }
   a.ticketLifeCycle {
-    background-image: @ticket-lifecycle-icon;
+    background-image: var(--ticket-lifecycle-icon);
   }
 }
 
@@ -185,7 +190,7 @@
   .overview-transactions-ticket {
     padding: 30px 20px;
   }
-  
+
   .overview-header {
     padding-top: 60px;
     padding-left: 20px;
@@ -213,7 +218,7 @@
     background-position: 50% 50%;
     background-repeat: no-repeat;
     &.balance {
-      background-image: @balanceTabIcon;
+      background-image: var(--balance-tab-icon);
     }
     &.tickets {
       background-image: var(--menu-tickets-default);
@@ -229,8 +234,8 @@
     padding-right: 0;
 
     .overview-header-wrapper {
-      width: 394px;  
-      min-width: 394px;  
+      width: 394px;
+      min-width: 394px;
     }
 
     .tabs > .tab > a {
@@ -242,7 +247,7 @@
 
       .overview-tab {
         border: 1px solid var(--home-content-link);
-        border-radius: 3px;        
+        border-radius: 3px;
       }
     }
   }

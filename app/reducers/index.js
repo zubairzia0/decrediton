@@ -1,6 +1,4 @@
 // @flow
-import { combineReducers } from "redux";
-import { routerReducer as routing } from "react-router-redux";
 import grpc from "./grpc";
 import walletLoader from "./walletLoader";
 import notifications from "./notifications";
@@ -17,7 +15,7 @@ import governance from "./governance";
 import trezor from "./trezor";
 import ln from "./ln";
 
-const rootReducer = combineReducers({
+export default {
   grpc,
   walletLoader,
   notifications,
@@ -27,13 +25,10 @@ const rootReducer = combineReducers({
   stakepool,
   daemon,
   locales,
-  routing,
   sidebar,
   snackbar,
   statistics,
   governance,
   trezor,
   ln
-});
-
-export default rootReducer;
+};
